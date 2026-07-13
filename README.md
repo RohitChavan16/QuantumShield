@@ -1,11 +1,11 @@
-# SentinelFuse Documentation
+# QuantumShield Documentation
 
-**Project Name:** SentinelFuse
+**Project Name:** QuantumShield
 **Status:** Source of Truth — v1.0
 
 ## Purpose
 
-SentinelFuse is a hackathon-winning prototype aimed at solving the FineSpark Hackathon Problem Statement 2 (PS2): **AI-Driven Correlation of Cybersecurity Telemetry & Transactional Behaviour**.
+QuantumShield is a hackathon-winning prototype aimed at solving the FineSpark Hackathon Problem Statement 2 (PS2): **AI-Driven Correlation of Cybersecurity Telemetry & Transactional Behaviour**.
 
 This documentation serves as the single source of truth for the project, mapping the vision, requirements, architecture, API, and contribution standards.
 
@@ -13,7 +13,7 @@ This documentation serves as the single source of truth for the project, mapping
 
 The one-sentence pitch: *"Your SIEM sees the malware. Your fraud engine sees the transfer. Nobody sees they're the same attack — until now."*
 
-SentinelFuse fuses cybersecurity telemetry with transactional behaviour in real time, so that an attack pattern invisible to a SIEM alone and invisible to a fraud engine alone becomes obvious the moment both signals are viewed together — explained in plain language, and extended to flag the bank's exposure to future quantum decryption risk.
+QuantumShield fuses cybersecurity telemetry with transactional behaviour in real time, so that an attack pattern invisible to a SIEM alone and invisible to a fraud engine alone becomes obvious the moment both signals are viewed together — explained in plain language, and extended to flag the bank's exposure to future quantum decryption risk.
 
 ## Quick Links
 

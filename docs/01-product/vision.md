@@ -8,7 +8,7 @@
 ## 1. Product Vision
 
 **Vision statement:**
-> SentinelFuse fuses cybersecurity telemetry with transactional behaviour in real time, so that an attack pattern invisible to a SIEM alone and invisible to a fraud engine alone becomes obvious the moment both signals are viewed together — explained in plain language, and extended to flag the bank's exposure to future quantum decryption risk.
+> QuantumShield fuses cybersecurity telemetry with transactional behaviour in real time, so that an attack pattern invisible to a SIEM alone and invisible to a fraud engine alone becomes obvious the moment both signals are viewed together — explained in plain language, and extended to flag the bank's exposure to future quantum decryption risk.
 
 **Why this vision, not a broader one:**
 The problem statement explicitly asks for *correlation*, not "another fraud detector" or "another SIEM." Every team that misreads this brief will build one or the other. We are building the **join**, which is the actual gap named in the problem statement.
@@ -17,7 +17,7 @@ The problem statement explicitly asks for *correlation*, not "another fraud dete
 *"Your SIEM sees the malware. Your fraud engine sees the transfer. Nobody sees they're the same attack — until now."*
 
 **Elevator pitch (30s, for casual judge conversation):**
-> "Banks run cybersecurity monitoring and fraud detection as two separate systems that never talk to each other. An attacker who compromises a bank employee's laptop and then initiates a wire transfer from it looks completely normal to the fraud engine — it's a valid session, valid credentials, valid transaction. SentinelFuse correlates the endpoint compromise with the transaction in real time, explains exactly why it's suspicious, and blocks it — while also tracking which parts of the bank's encryption are vulnerable to future quantum decryption attacks. It's the missing link between security operations and fraud operations."
+> "Banks run cybersecurity monitoring and fraud detection as two separate systems that never talk to each other. An attacker who compromises a bank employee's laptop and then initiates a wire transfer from it looks completely normal to the fraud engine — it's a valid session, valid credentials, valid transaction. QuantumShield correlates the endpoint compromise with the transaction in real time, explains exactly why it's suspicious, and blocks it — while also tracking which parts of the bank's encryption are vulnerable to future quantum decryption attacks. It's the missing link between security operations and fraud operations."
 
 **What we are NOT building:**
 A general-purpose SIEM, a general-purpose fraud ML platform, a production PQC migration tool. We are building the **correlation and explainability layer** that sits on top of / between those systems. Scoping this narrowly is itself a strategic decision — see [ADR-001](../18-decisions/ADR-001-scope.md).
@@ -43,4 +43,4 @@ A general-purpose SIEM, a general-purpose fraud ML platform, a production PQC mi
 
 ### 2.3 Root Cause Statement
 
-> The correlation gap exists because cybersecurity and fraud systems are architected as **independent decision boundaries** rather than **contributors to one shared decision.** SentinelFuse's core innovation is architectural, not algorithmic: a shared event bus + sliding-window entity join that lets both domains contribute to one score.
+> The correlation gap exists because cybersecurity and fraud systems are architected as **independent decision boundaries** rather than **contributors to one shared decision.** QuantumShield's core innovation is architectural, not algorithmic: a shared event bus + sliding-window entity join that lets both domains contribute to one score.
