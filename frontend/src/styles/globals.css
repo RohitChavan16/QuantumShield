@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-bg-base: #0B0F1A;
+    --color-bg-surface: #121826;
+    --color-bg-surface-alt: #1A2233;
+    --color-border: #2A3448;
+    --color-text-primary: #E6EAF2;
+    --color-text-secondary: #8B96AB;
+    --color-text-muted: #5B6577;
+    --color-accent: #22D3EE;
+    --color-accent-glow: rgba(34, 211, 238, 0.2); /* 33 hex is 20% opacity */
+    --color-critical: #EF4444;
+    --color-high: #F59E0B;
+    --color-medium: #FACC15;
+    --color-low: #34D399;
+    --color-info: #60A5FA;
+  }
+
+  body {
+    @apply bg-background text-text-primary antialiased font-sans;
+    background-image: 
+      radial-gradient(circle at 50% 0%, rgba(34, 211, 238, 0.04) 0%, transparent 60%),
+      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
+  }
+}

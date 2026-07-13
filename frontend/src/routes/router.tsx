@@ -1,23 +1,47 @@
 import { createBrowserRouter } from 'react-router-dom';
-import AppShell from '../layouts/AppShell';
+import { AppShell } from '../layouts/AppShell';
 import { ROUTES } from '../constants/routes';
 
-import { Placeholder } from '../components/Placeholder';
+import { RequireAuth, RequireRole } from '../contexts/RequireAuth';
+import { Login } from '../pages/Login';
+import { NotFound } from '../pages/NotFound';
+import { FusionDashboard } from '../pages/FusionDashboard';
+import { TransactionExplorer } from '../pages/TransactionExplorer';
+import { ThreatTimeline } from '../pages/ThreatTimeline';
+import { AttackGraph } from '../pages/AttackGraph';
+import { QuantumDashboard } from '../pages/QuantumDashboard';
+import { AiInvestigation } from '../pages/AiInvestigation';
+import { CaseManagement } from '../pages/CaseManagement';
+import { ExecutiveDashboard } from '../pages/ExecutiveDashboard';
+import { Settings } from '../pages/Settings';
 
 export const router = createBrowserRouter([
+  { path: '/login', element: <Login /> },
   {
     path: '/',
-    element: <AppShell />,
+    element: (
+      <RequireAuth>
+        <AppShell />
+      </RequireAuth>
+    ),
+    errorElement: <NotFound />,
     children: [
-      { path: ROUTES.DASHBOARD, element: <Placeholder title="Fusion Dashboard" /> },
-      { path: ROUTES.ALERTS, element: <Placeholder title="Alerts Management" /> },
-      { path: ROUTES.THREAT_TIMELINE, element: <Placeholder title="Threat Timeline" /> },
-      { path: ROUTES.TRANSACTIONS, element: <Placeholder title="Transaction Explorer" /> },
-      { path: ROUTES.QUANTUM, element: <Placeholder title="Quantum Assets" /> },
-      { path: ROUTES.AI_INVESTIGATION, element: <Placeholder title="AI Investigation" /> },
-      { path: ROUTES.EXECUTIVE, element: <Placeholder title="Executive Dashboard" /> },
-      { path: ROUTES.CASE_MANAGEMENT, element: <Placeholder title="Case Management" /> },
-      { path: ROUTES.SETTINGS, element: <Placeholder title="System Settings" /> },
+      { index: true, element: <FusionDashboard /> },
+      { path: ROUTES.ALERTS, element: <AttackGraph /> },
+      { path: ROUTES.THREAT_TIMELINE, element: <ThreatTimeline /> },
+      { path: ROUTES.TRANSACTIONS, element: <TransactionExplorer /> },
+      { path: ROUTES.QUANTUM, element: <QuantumDashboard /> },
+      { path: ROUTES.AI_INVESTIGATION, element: <AiInvestigation /> },
+      { 
+        path: ROUTES.EXECUTIVE, 
+        element: <RequireRole roles={['admin', 'executive']}><ExecutiveDashboard /></RequireRole>
+      },
+      { path: ROUTES.CASE_MANAGEMENT, element: <CaseManagement /> },
+      { 
+        path: ROUTES.SETTINGS, 
+        element: <RequireRole roles={['admin']}><Settings /></RequireRole>
+      },
+      { path: '*', element: <NotFound /> },
     ],
   },
 ]);
