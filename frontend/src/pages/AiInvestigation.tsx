@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -8,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import api from '../services/api';
 import { MOCK_ALERTS } from '../services/mockData';
 import { useToast } from '../components/ui/Toast';
-
+import ReactMarkdown from 'react-markdown';
 interface ChatMessage {
   id: string;
   role: 'user' | 'assistant';
@@ -16,7 +17,10 @@ interface ChatMessage {
 }
 
 export function AiInvestigation() {
-  const [selectedAlertId, setSelectedAlertId] = useState<string>('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialAlertId = searchParams.get('alertId') || '';
+  
+  const [selectedAlertId, setSelectedAlertId] = useState<string>(initialAlertId);
   const [searchTerm, setSearchTerm] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -110,8 +114,11 @@ export function AiInvestigation() {
           {filteredAlerts.map((alert: any) => (
             <button
               key={alert.id}
-              onClick={() => setSelectedAlertId(alert.id)}
-              className={`w-full text-left p-3 rounded-md transition-colors ${selectedAlertId === alert.id ? 'bg-surface-alt border border-border shadow-glow' : 'hover:bg-surface-alt/50 border border-transparent'}`}
+              onClick={() => {
+                setSelectedAlertId(alert.id);
+                setSearchParams({ alertId: alert.id });
+              }}
+              className={`w-full text-left p-3 rounded-card text-sm transition-colors border ${selectedAlertId === alert.id ? 'bg-surface-alt border-border' : 'border-transparent hover:bg-surface-alt/50 text-text-secondary hover:text-text-primary'}`}
             >
               <div className="flex justify-between items-center mb-1">
                 <span className="font-mono text-sm font-semibold text-text-primary">{alert.id}</span>
@@ -158,8 +165,7 @@ export function AiInvestigation() {
                         ? 'bg-surface-alt text-text-primary rounded-tr-sm border border-border' 
                         : 'bg-surface border border-border text-text-primary rounded-tl-sm shadow-sm'
                     }`}>
-                      {/* Very basic markdown bold rendering for mock */}
-                      <span dangerouslySetInnerHTML={{__html: msg.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}} />
+                      <div className="text-sm font-medium"><ReactMarkdown>{msg.content}</ReactMarkdown></div>
                     </div>
                     {msg.role === 'assistant' && (
                       <div className="flex items-center gap-3 mt-2 px-1">

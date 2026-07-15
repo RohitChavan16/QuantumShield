@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import api from '../services/api';
 import { MOCK_ALERTS } from '../services/mockData';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Sparkles, ArrowRight, ShieldBan, CheckCircle2, Flag } from 'lucide-react';
+import { Sparkles, ArrowRight, ShieldBan, CheckCircle2, Flag, Share2, ArrowLeftRight, Activity } from 'lucide-react';
 import { useToast } from './ui/Toast';
 import { Link } from 'react-router-dom';
 
@@ -184,8 +184,22 @@ export function AlertDetailDrawer({ alertId, isOpen, onClose }: AlertDetailDrawe
           </div>
 
           {/* Action Footer */}
-          <div className="p-4 border-t border-border bg-surface flex flex-col gap-3 shrink-0">
-            <div className="flex gap-3">
+          <div className="p-4 border-t border-border bg-surface flex flex-col gap-4 shrink-0">
+            <div className="grid grid-cols-2 gap-2">
+              <Link to={`/alerts?alertId=${alert.id}`} className="block">
+                <Button variant="outline" className="w-full text-xs h-8 justify-start"><Share2 className="w-3 h-3 mr-2 text-accent" /> Attack Graph</Button>
+              </Link>
+              <Link to={`/threat-timeline?alertId=${alert.id}&entity=${alert.entity_id}`} className="block">
+                <Button variant="outline" className="w-full text-xs h-8 justify-start"><Activity className="w-3 h-3 mr-2 text-accent" /> Threat Timeline</Button>
+              </Link>
+              <Link to={`/transactions?alertId=${alert.id}`} className="block">
+                <Button variant="outline" className="w-full text-xs h-8 justify-start"><ArrowLeftRight className="w-3 h-3 mr-2 text-accent" /> Txn Explorer</Button>
+              </Link>
+              <Link to={`/ai-investigation?alertId=${alert.id}`} className="block">
+                <Button variant="outline" className="w-full text-xs h-8 justify-start"><Sparkles className="w-3 h-3 mr-2 text-accent" /> AI Investigation</Button>
+              </Link>
+            </div>
+            <div className="flex gap-3 pt-4 border-t border-border">
               <Button 
                 variant="destructive" 
                 className="flex-1" 

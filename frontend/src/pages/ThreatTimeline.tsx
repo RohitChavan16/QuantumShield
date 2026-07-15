@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
@@ -6,20 +7,23 @@ import { EmptyState } from '../components/ui/EmptyState';
 import { Search, Activity } from 'lucide-react';
 import { ComposedChart, Scatter, XAxis, YAxis, Tooltip as RechartsTooltip, ResponsiveContainer, ZAxis, Cell } from 'recharts';
 import { Badge } from '../components/ui/Badge';
+import { MOCK_TIMELINE_EVENTS } from '../services/mockData';
 
 export function ThreatTimeline() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [hasSearched, setHasSearched] = useState(false);
+  const [searchParams] = useSearchParams();
+  const initialEntity = searchParams.get('entity') || '';
+  
+  const [searchTerm, setSearchTerm] = useState(initialEntity);
+  const [hasSearched, setHasSearched] = useState(!!initialEntity);
 
-  // Hardcoded mock data for timeline events
-  const data = [
-    { time: new Date(Date.now() - 1000 * 3600).getTime(), lane: 'Authentication', type: 'Failed Login', color: 'var(--color-critical)' },
-    { time: new Date(Date.now() - 1000 * 3500).getTime(), lane: 'Authentication', type: 'Failed Login', color: 'var(--color-critical)' },
-    { time: new Date(Date.now() - 1000 * 3400).getTime(), lane: 'Authentication', type: 'Successful Login', color: 'var(--color-low)' },
-    { time: new Date(Date.now() - 1000 * 3300).getTime(), lane: 'Endpoint', type: 'Process Execution', color: 'var(--color-high)' },
-    { time: new Date(Date.now() - 1000 * 3200).getTime(), lane: 'Endpoint', type: 'File Modification', color: 'var(--color-medium)' },
-    { time: new Date(Date.now() - 1000 * 1200).getTime(), lane: 'Transaction', type: 'Transfer Request', color: 'var(--color-critical)' },
-  ];
+  useEffect(() => {
+    if (initialEntity) {
+      setSearchTerm(initialEntity);
+      setHasSearched(true);
+    }
+  }, [initialEntity]);
+
+  const data = MOCK_TIMELINE_EVENTS;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

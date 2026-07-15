@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { DndContext, DragOverlay, closestCorners, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -13,9 +14,27 @@ import { useToast } from '../components/ui/Toast';
 const COLUMNS = ['NEW', 'INVESTIGATING', 'RESOLVED'];
 
 export function CaseManagement() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const alertIdParam = searchParams.get('alertId');
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [selectedAlertId, setSelectedAlertId] = useState<string | null>(null);
+  const [selectedAlertId, setSelectedAlertId] = useState<string | null>(alertIdParam);
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (alertIdParam !== selectedAlertId) {
+      setSelectedAlertId(alertIdParam);
+    }
+  }, [alertIdParam]);
+
+  const handleCardClick = (id: string) => {
+    setSearchParams({ alertId: id });
+    setSelectedAlertId(id);
+  };
+
+  const handleDrawerClose = () => {
+    setSearchParams({});
+    setSelectedAlertId(null);
+  };
 
   const { data: alerts, isLoading, setData } = useQuery({
     queryKey: ['alerts_kanban'],
@@ -83,7 +102,7 @@ export function CaseManagement() {
         >
           <div className="flex gap-6 h-full items-start min-w-[900px]">
             {COLUMNS.map(columnId => (
-              <Column key={columnId} id={columnId} title={columnId} items={getItemsByStatus(columnId)} onCardClick={setSelectedAlertId} />
+              <Column key={columnId} id={columnId} title={columnId} items={getItemsByStatus(columnId)} onCardClick={handleCardClick} />
             ))}
           </div>
 
@@ -95,7 +114,7 @@ export function CaseManagement() {
 
       <AlertDetailDrawer 
         isOpen={!!selectedAlertId} 
-        onClose={() => setSelectedAlertId(null)} 
+        onClose={handleDrawerClose} 
         alertId={selectedAlertId} 
       />
     </div>

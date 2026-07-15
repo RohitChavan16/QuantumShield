@@ -36,6 +36,18 @@ export function AppShell() {
 
   const currentRouteName = navItems.find(item => item.path === location.pathname || (item.path !== '/' && location.pathname.startsWith(item.path)))?.name || 'Dashboard';
 
+  const searchParams = new URLSearchParams(location.search);
+  const alertId = searchParams.get('alertId');
+  const entityId = searchParams.get('entity');
+  
+  const getContextualPath = (path: string) => {
+    const params = new URLSearchParams();
+    if (alertId) params.set('alertId', alertId);
+    if (entityId) params.set('entity', entityId);
+    const queryString = params.toString();
+    return queryString ? `${path}?${queryString}` : path;
+  };
+
   return (
     <div className="flex h-screen w-full bg-background overflow-hidden text-text-primary font-sans">
       
@@ -53,7 +65,7 @@ export function AppShell() {
           {navItems.map((item) => (
             <NavLink
               key={item.path}
-              to={item.path}
+              to={getContextualPath(item.path)}
               className={({ isActive }) =>
                 `flex items-center px-3 py-2.5 rounded-md transition-colors group ${
                   isActive 

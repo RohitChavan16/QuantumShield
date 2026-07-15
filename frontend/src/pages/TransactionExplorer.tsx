@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import api from '../services/api';
-import { MOCK_TRANSACTIONS } from '../services/mockData';
+import { MOCK_TRANSACTIONS, MOCK_ALERTS } from '../services/mockData';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
@@ -14,10 +15,26 @@ import { Download, Search, Link as LinkIcon } from 'lucide-react';
 import { useToast } from '../components/ui/Toast';
 
 export function TransactionExplorer() {
+  const [searchParams] = useSearchParams();
+  const alertId = searchParams.get('alertId');
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [decisionFilter, setDecisionFilter] = useState('ALL');
   const [selectedAlertId, setSelectedAlertId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (alertId) {
+      const alert = MOCK_ALERTS.find(a => a.id === alertId);
+      if (alert && alert.linked_transaction) {
+        setSearchTerm(alert.linked_transaction.id);
+      } else if (alert) {
+        setSearchTerm(alert.entity_id);
+      }
+    }
+  }, [alertId]);
 
   const { data: transactions, isLoading } = useQuery({
     queryKey: ['transactions'],
@@ -36,6 +53,9 @@ export function TransactionExplorer() {
     const matchesDecision = decisionFilter === 'ALL' || tx.decision === decisionFilter;
     return matchesSearch && matchesDecision;
   }) || [];
+
+  const paginatedData = filteredData.slice((page - 1) * pageSize, page * pageSize);
+  const totalPages = Math.ceil(filteredData.length / pageSize) || 1;
 
   const handleExport = () => {
     if (!filteredData.length) return;
@@ -77,13 +97,19 @@ export function TransactionExplorer() {
             <Input 
               placeholder="Search ID or Account..." 
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(1);
+              }}
               className="pl-9"
             />
           </div>
           <Select 
             value={decisionFilter} 
-            onChange={(e) => setDecisionFilter(e.target.value)}
+            onChange={(e) => {
+              setDecisionFilter(e.target.value);
+              setPage(1);
+            }}
             className="w-40"
           >
             <option value="ALL">All Decisions</option>
@@ -122,14 +148,14 @@ export function TransactionExplorer() {
                     ))}
                   </TableRow>
                 ))
-              ) : filteredData.length === 0 ? (
+              ) : paginatedData.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} className="h-24 text-center text-text-muted">
                     No transactions found.
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredData.map((tx: any) => (
+                paginatedData.map((tx: any) => (
                   <TableRow 
                     key={tx.id} 
                     className="cursor-pointer"
@@ -168,8 +194,12 @@ export function TransactionExplorer() {
             </TableBody>
           </Table>
         </div>
-        <div className="p-4 border-t border-border flex justify-center bg-surface shrink-0">
-          <Button variant="ghost" size="sm" disabled>Load more</Button>
+        <div className="p-4 border-t border-border flex justify-between items-center bg-surface shrink-0">
+          <span className="text-sm text-text-muted">Showing {Math.min(filteredData.length, (page - 1) * pageSize + 1)} to {Math.min(filteredData.length, page * pageSize)} of {filteredData.length}</span>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" disabled={page === 1} onClick={() => setPage(page - 1)}>Previous</Button>
+            <Button variant="outline" size="sm" disabled={page === totalPages} onClick={() => setPage(page + 1)}>Next</Button>
+          </div>
         </div>
       </Card>
 

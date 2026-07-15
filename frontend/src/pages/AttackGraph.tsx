@@ -7,40 +7,67 @@ import { EmptyState } from '../components/ui/EmptyState';
 import { Search, Share2, Filter, Info, Activity } from 'lucide-react';
 import { ReactFlow, Controls, Background, MiniMap } from '@xyflow/react';
 import type { Node, Edge } from '@xyflow/react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import '@xyflow/react/dist/style.css';
 
-const initialNodes: Node[] = [
-  { id: 'usr-1', position: { x: 100, y: 300 }, data: { label: 'jdoe' }, type: 'input' },
-  { id: 'ep-1', position: { x: 400, y: 300 }, data: { label: 'EP-WS-NYC-04' } },
-  { id: 'act-1', position: { x: 700, y: 200 }, data: { label: 'ACCT-9901-CORP' } },
-  { id: 'ext-1', position: { x: 1000, y: 200 }, data: { label: 'ACCT-8120-EXT' }, type: 'output' },
-  { id: 'ep-2', position: { x: 400, y: 500 }, data: { label: 'EP-MOB-881' } },
-  { id: 'act-2', position: { x: 700, y: 500 }, data: { label: 'ACCT-1022-RETAIL' } },
-  { id: 'ext-2', position: { x: 1000, y: 500 }, data: { label: 'ACCT-0091-EXT' }, type: 'output' },
-];
+import { MOCK_ALERTS } from '../services/mockData';
 
-const initialEdges: Edge[] = [
-  { id: 'e1-2', source: 'usr-1', target: 'ep-1', animated: true, style: { stroke: 'var(--color-critical)', strokeWidth: 2 } },
-  { id: 'e2-3', source: 'ep-1', target: 'act-1', animated: true, style: { stroke: 'var(--color-critical)', strokeWidth: 2 } },
-  { id: 'e3-4', source: 'act-1', target: 'ext-1', animated: true, style: { stroke: 'var(--color-critical)', strokeWidth: 2 } },
-  { id: 'e1-5', source: 'usr-1', target: 'ep-2', animated: false, style: { stroke: 'var(--color-medium)', strokeWidth: 1 } },
-  { id: 'e5-6', source: 'ep-2', target: 'act-2', animated: false, style: { stroke: 'var(--color-medium)', strokeWidth: 1 } },
-  { id: 'e6-7', source: 'act-2', target: 'ext-2', animated: false, style: { stroke: 'var(--color-medium)', strokeWidth: 1 } },
-];
+const generateGraphData = (alertId: string | null) => {
+  const nodes: Node[] = [];
+  const edges: Edge[] = [];
+  
+  // Use the requested alert or fallback to the critical one
+  const alert = (alertId ? MOCK_ALERTS.find(a => a.id === alertId) : null) || MOCK_ALERTS.find(a => a.severity === 'critical') || MOCK_ALERTS[0];
+  
+  // 1. External Threat Source
+  nodes.push({ id: 'src-ip', position: { x: 50, y: 250 }, data: { label: `Attacker IP\n${alert.raw.ip}` }, style: { backgroundColor: 'var(--color-critical)', color: 'white', border: 'none', borderRadius: '8px', padding: '10px' } });
+  
+  // 2. Firewall / Gateway
+  nodes.push({ id: 'fw', position: { x: 250, y: 250 }, data: { label: 'Perimeter Firewall' }, style: { backgroundColor: 'var(--color-surface-alt)', color: 'var(--color-text-primary)', border: '1px solid var(--color-border)', borderRadius: '8px' } });
+  
+  // 3. Compromised Endpoint
+  nodes.push({ id: 'ep', position: { x: 500, y: 250 }, data: { label: `Compromised Endpoint\n${alert.entity_id}` }, style: { backgroundColor: 'rgba(239, 68, 68, 0.2)', border: '2px solid var(--color-critical)', borderRadius: '8px', color: 'var(--color-text-primary)' } });
+  
+  // 4. Compromised User
+  nodes.push({ id: 'usr', position: { x: 500, y: 100 }, data: { label: `Compromised User\n${alert.raw.user}` }, style: { backgroundColor: 'rgba(245, 158, 11, 0.2)', border: '2px solid var(--color-high)', borderRadius: '8px', color: 'var(--color-text-primary)' } });
+  
+  // 5. Internal Account
+  nodes.push({ id: 'act-in', position: { x: 750, y: 250 }, data: { label: `Internal Account\n${alert.linked_transaction?.sender}` }, style: { backgroundColor: 'var(--color-surface-alt)', border: '1px solid var(--color-border)', borderRadius: '8px', color: 'var(--color-text-primary)' } });
+  
+  // 6. External Transfer
+  nodes.push({ id: 'act-out', position: { x: 1000, y: 250 }, data: { label: `External Account\n${alert.linked_transaction?.receiver}` }, style: { backgroundColor: 'var(--color-surface-alt)', border: '1px dashed var(--color-border)', borderRadius: '8px', color: 'var(--color-text-primary)' }, type: 'output' });
+
+  // Add edges
+  edges.push({ id: 'e1', source: 'src-ip', target: 'fw', animated: true, style: { stroke: 'var(--color-critical)', strokeWidth: 2 } });
+  edges.push({ id: 'e2', source: 'fw', target: 'ep', animated: true, style: { stroke: 'var(--color-critical)', strokeWidth: 2 } });
+  edges.push({ id: 'e3', source: 'usr', target: 'ep', animated: true, style: { stroke: 'var(--color-high)', strokeWidth: 2 } });
+  edges.push({ id: 'e4', source: 'ep', target: 'act-in', animated: true, label: 'Lateral Movement', labelStyle: { fill: 'var(--color-text-secondary)', fontSize: 10 }, style: { stroke: 'var(--color-critical)', strokeWidth: 2 } });
+  edges.push({ id: 'e5', source: 'act-in', target: 'act-out', animated: true, label: `Transfer ₹${(alert.linked_transaction?.amount || 0) / 100000}L`, labelBgStyle: { fill: 'var(--color-surface)' }, labelStyle: { fill: 'var(--color-critical)', fontWeight: 'bold' }, style: { stroke: 'var(--color-critical)', strokeWidth: 3 } });
+
+  // Add some decoy/normal nodes for realism
+  nodes.push({ id: 'ep-norm', position: { x: 500, y: 400 }, data: { label: 'Normal Endpoint\nCORP-MAC-01' }, style: { backgroundColor: 'var(--color-surface-alt)', border: '1px solid var(--color-border)', borderRadius: '8px', color: 'var(--color-text-secondary)' } });
+  edges.push({ id: 'e-norm', source: 'fw', target: 'ep-norm', animated: false, style: { stroke: 'var(--color-text-muted)', strokeWidth: 1 } });
+  
+  return { nodes, edges, alert };
+};
 
 export function AttackGraph() {
+  const [searchParams] = useSearchParams();
+  const alertId = searchParams.get('alertId');
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [showCriticalOnly, setShowCriticalOnly] = useState(false);
+  
+  const { nodes: allNodes, edges: allEdges } = React.useMemo(() => generateGraphData(alertId), [alertId]);
 
   const onNodeClick = (_: React.MouseEvent, node: Node) => {
     setSelectedNode(node);
   };
 
   const filteredNodes = showCriticalOnly 
-    ? initialNodes.filter(n => ['usr-1', 'ep-1', 'act-1', 'ext-1'].includes(n.id)) 
-    : initialNodes;
+    ? allNodes.filter(n => n.style?.borderColor === 'var(--color-critical)' || n.id === 'src-ip' || n.id.includes('act')) 
+    : allNodes;
 
   return (
     <div className="flex h-full gap-6">
@@ -67,7 +94,7 @@ export function AttackGraph() {
           </Button>
         </div>
 
-        {initialNodes.length === 0 ? (
+        {allNodes.length === 0 ? (
           <div className="flex-1 flex items-center justify-center">
             <EmptyState 
               icon={Share2} 
@@ -79,7 +106,7 @@ export function AttackGraph() {
           <div className="flex-1 h-full w-full">
             <ReactFlow 
               nodes={filteredNodes} 
-              edges={initialEdges} 
+              edges={allEdges} 
               onNodeClick={onNodeClick}
               fitView 
               colorMode="dark"
@@ -136,7 +163,7 @@ export function AttackGraph() {
             </div>
 
             <div className="pt-4 border-t border-border mt-auto">
-              <Link to="/timeline" className="block">
+              <Link to={`/threat-timeline?entity=${encodeURIComponent((selectedNode.data.label as string).split('\n').pop() || '')}`} className="block">
                 <Button variant="outline" className="w-full">
                   <Activity className="w-4 h-4 mr-2" /> View Timeline
                 </Button>
