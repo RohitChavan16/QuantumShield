@@ -7,7 +7,8 @@
 Current SIEM and anti-fraud systems operate in silos, leading to alert fatigue and missed cross-domain threats. QuantumShield unifies cybersecurity telemetry (network, endpoint, IAM) with transactional data in real-time. By applying AI-driven correlation and quantum-safe cryptographic tracking (CBOMs), it detects sophisticated, multi-vector fraud campaigns that traditional isolated systems miss.
 
 ## Architecture
-
+![alt text](image.png)
+![alt text](image-1.png)
 *See `docs/` for full architecture and Phase 1 product discovery documents.*
 
 At a high level:
