@@ -191,7 +191,6 @@ export function FusionDashboard() {
       setLiveAlerts(alerts);
       if (!initialLoadDone.current && !alertIdParam && alerts.length > 0) {
         setSelectedAlertId(alerts[0].id);
-        setSearchParams({ alertId: alerts[0].id }, { replace: true });
         initialLoadDone.current = true;
       }
     }
